@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inforest WebAPI - Documentación</title>
+    <style>
+        :root {
+            --bg-main: #f8fafc; --sidebar-bg: #1e293b; --text-main: #334155; 
+            --accent: #2563eb; --code-bg: #0f172a; --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { display: flex; background: var(--bg-main); color: var(--text-main); min-height: 100vh; }
+        
+        /* Layout Sidebar / Main */
+        .sidebar { width: 280px; background: var(--sidebar-bg); color: white; padding: 30px; position: fixed; height: 100%; }
+        .sidebar h2 { margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 10px; font-size: 1.4rem; }
+        .sidebar a { color: #cbd5e1; display: block; margin-bottom: 15px; text-decoration: none; font-size: 0.95rem; }
+        .sidebar a:hover { color: white; }
+        
+        .content { margin-left: 280px; padding: 50px; display: flex; gap: 50px; max-width: 1400px; width: 100%; }
+        .docs { flex: 1; }
+        
+        /* Tipografía */
+        h1 { color: #0f172a; font-size: 2.2rem; margin-bottom: 15px; }
+        h3 { color: #0f172a; margin: 35px 0 15px 0; border-bottom: 2px solid var(--border); padding-bottom: 5px; }
+        p { line-height: 1.6; margin-bottom: 20px; color: #475569; }
+        
+        /* Badges */
+        .endpoint-wrapper { background: white; padding: 15px 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .endpoint { font-family: monospace; font-size: 1.05rem; color: #1e293b; word-break: break-all; }
+        .method { background: #10b981; color: white; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-right: 12px; font-family: sans-serif; }
+        .url-base { color: #64748b; }
+        .url-path { color: #1e40af; font-weight: 600; }
+        .url-params { color: #d97706; font-weight: 600; }
+        .type { color: var(--accent); font-family: monospace; font-size: 0.8rem; background: #eff6ff; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+        
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        th { background: #f1f5f9; color: #475569; font-weight: 600; }
+        td strong { color: #0f172a; font-family: monospace; }
+        
+        /* Código JSON */
+        .code-panel { width: 450px; position: sticky; top: 50px; height: fit-content; background: var(--code-bg); border-radius: 10px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .code-header { background: #0b1120; padding: 12px 20px; color: #94a3b8; font-size: 0.85rem; font-family: monospace; }
+        pre { color: #e2e8f0; font-family: 'Consolas', monospace; font-size: 0.85rem; padding: 20px; overflow-x: auto; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Inforest WebAPI</h2>
+        <a href="#intro">Introducción</a>
+        <a href="#endpoint">Endpoint: Crear Pedido</a>
+        <a href="#cabecera">Estructura Cabecera</a>
+        <a href="#detalle">Estructura Detalle</a>
+        <a href="#pago">Estructura Prepagos</a>
+    </div>
+
+    <div class="content">
+        <div class="docs">
+            <h1 id="intro">Documentación de Integración Web</h1>
+            <p>Guía técnica para que plataformas externas envíen pedidos a la infraestructura de <b>Inforest POS</b> mediante nuestra WebAPI, impactando directamente en la base de datos de facturación.</p>
+            
+            <div class="endpoint-wrapper" id="endpoint">
+                <p style="margin-bottom: 8px; font-size: 0.85rem; color: #64748b; font-weight: bold; text-transform: uppercase;">URL del Endpoint Principal</p>
+                <div class="endpoint">
+                    <span class="method">POST</span>
+                    <span class="url-base">{URL_BASE}</span><span class="url-path">/api/pedido/InsertarPedidoweb2</span><span class="url-params">?local=1</span>
+                </div>
+            </div>
+
+            <h3 id="cabecera">1. Estructura de Cabecera (Root Payload)</h3>
+            <table>
+                <tr><th>Campo</th><th>Descripción</th></tr>
+                <tr><td><strong>Local</strong><span class="type">string</span></td><td>ID numérico de la sucursal de atención (También enviado en la URL).</td></tr>
+                <tr><td><strong>Tipopedido</strong><span class="type">string</span></td><td>Código de canal operativo (ej. 02 = Delivery).</td></tr>
+                <tr><td><strong>Tipodocumento</strong><span class="type">string</span></td><td>Comprobante tributario (01 = Boleta, 02 = Factura).</td></tr>
+                <tr><td><strong>Ruc</strong><span class="type">string</span></td><td>Número de documento o RUC del cliente.</td></tr>
+                <tr><td><strong>EstadoPago</strong><span class="type">integer</span></td><td>0 = Pendiente, 1 = Cobro exitoso en web.</td></tr>
+                <tr><td><strong>Fechaenvia</strong><span class="type">string</span></td><td>Timestamp de generación web (YYYY-MM-DD HH:MM:SS).</td></tr>
+            </table>
+
+            <h3 id="detalle">2. Detalle del Pedido (Array: DetallePedido)</h3>
+            <p>Representa las líneas de venta que descargarán el stock en Inforest.</p>
+            <table>
+                <tr><th>Campo</th><th>Descripción</th></tr>
+                <tr><td><strong>Item</strong><span class="type">string</span></td><td>Correlativo de línea (001, 002).</td></tr>
+                <tr><td><strong>Codigoproducto</strong><span class="type">string</span></td><td>Código maestro unificado en la BD de Inforest.</td></tr>
+                <tr><td><strong>Cantidad</strong><span class="type">integer</span></td><td>Número de unidades del producto.</td></tr>
+                <tr><td><strong>Observacion</strong><span class="type">string</span></td><td>Indicaciones a imprimir en ticket/comanda de cocina.</td></tr>
+            </table>
+
+            <h3 id="pago">3. Información Financiera (Array: Prepagos)</h3>
+            <p>Sustento del cobro realizado desde la pasarela e-commerce para cuadre de caja.</p>
+            <table>
+                <tr><th>Campo</th><th>Descripción</th></tr>
+                <tr><td><strong>Tipopago</strong><span class="type">string</span></td><td>Medio de pago autorizado (ej. 02 = Tarjeta).</td></tr>
+                <tr><td><strong>Monto</strong><span class="type">number</span></td><td>Monto exacto cobrado al cliente.</td></tr>
+                <tr><td><strong>Tarjeta</strong><span class="type">string</span></td><td>Código del proveedor (Visa, MC, Diners, etc.).</td></tr>
+                <tr><td><strong>Numero</strong><span class="type">string</span></td><td>Últimos 4 dígitos del plástico.</td></tr>
+            </table>
+        </div>
+
+        <div class="code-panel">
+            <div class="code-header">Payload JSON (Ejemplo POST)</div>
+            <pre>{
+  "Local": "1",
+  "Tipopedido": "02",
+  "Telefono": "947407377",
+  "Nombre": "Yulliana",
+  "Apellido": "Llauce",
+  "Direccion": "Avenida Arequipa 4398...",
+  "Tipodocumento": "02",
+  "Ruc": "45460104",
+  "Razonsocial": "Yulliana Llauce",
+  "Fechaenvia": "2023-12-14 09:30:08",
+  "Observacion": "HORARIO DE ENTREGA...",
+  "EstadoPago": 1,
+  "DetallePedido": [
+    {
+      "Item": "001",
+      "Codigoproducto": "0001479",
+      "Cantidad": 1,
+      "Lcombo": "0",
+      "Observacion": "¡Feliz cumpleaños Julio!"
+    }
+  ],
+  "Prepagos": [
+    {
+      "Tipopago": "02",
+      "Monto": 45.00,
+      "Tarjeta": "17",
+      "Numero": "8146"
+    }
+  ]
+}</pre>
+        </div>
+    </div>
+</body>
+</html>

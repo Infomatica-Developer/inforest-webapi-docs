@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: Inforest WebAPI - Integración de Pedidos
+  version: 1.0.0
+  description: Especificación técnica para la integración de plataformas e-commerce y aplicaciones web con el sistema Inforest POS. Permite la recepción automática de pedidos digitales.
+servers:
+  - url: https://api.tudominio.com
+    description: Servidor Base WebAPI Producción (Sustituir con el dominio real)
+paths:
+  /api/pedido/InsertarPedidoweb2:
+    post:
+      summary: Crear un nuevo pedido web
+      description: Recibe el payload del pedido. Los datos se mapean a las tablas de cabecera, detalle y formas de pago de Inforest.
+      operationId: registrarPedido
+      parameters:
+        - name: local
+          in: query
+          required: true
+          description: ID interno de la sucursal o local (ej. 1)
+          schema:
+            type: string
+            example: "1"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pedido'
+      responses:
+        '200':
+          description: Pedido registrado exitosamente.
+components:
+  schemas:
+    Pedido:
+      type: object
+      properties:
+        Local:
+          type: string
+          description: ID interno de la sucursal.
+          example: "1"
+        Tipopedido:
+          type: string
+          description: Código del tipo de pedido (ej. 02 = Delivery/Llevar).
+          example: "02"
+        Telefono:
+          type: string
+          example: "947407377"
+        Nombre:
+          type: string
+          example: "Yulliana"
+        Apellido:
+          type: string
+          example: "Llauce"
+        Direccion:
+          type: string
+          example: "Avenida Arequipa 4398, Miraflores, Perú"
+        Correo:
+          type: string
+          example: "yulliana.llauce@gmail.com"
+        Tipodocumento:
+          type: string
+          description: "Tipo de comprobante a emitir (ej. 01=Boleta/DNI, 02=Factura/RUC)."
+          example: "02"
+        Ruc:
+          type: string
+          description: Número de RUC, DNI o Carnet de Extranjería.
+          example: "45460104"
+        Razonsocial:
+          type: string
+          example: "Yulliana Llauce"
+        Fechaenvia:
+          type: string
+          description: Fecha y hora de generación de la orden en la web.
+          example: "2023-12-14 09:30:08"
+        Referencia:
+          type: string
+          example: "Referencias: en sus esquinas..."
+        CorreoElectronico:
+          type: string
+          example: "yulliana.llauce@gmail.com"
+        Ubigeo:
+          type: string
+          example: "150122"
+        Urbanizacion:
+          type: string
+          example: "MIRAFLORES"
+        Observacion:
+          type: string
+          description: Notas globales del pedido a imprimir en la comanda.
+          example: "HORARIO DE ENTREGA (16:00-18:00) - REGALO ( NO ENVIAR BOLETA )"
+        DireccionClienteFacturado:
+          type: string
+          example: "Avenida Arequipa 4398, Miraflores, Perú"
+        FechaEntrega:
+          type: string
+          description: Fecha y hora programada para la entrega (Formato ISO).
+          example: "2023-12-14T16:00:00"
+        EstadoPago:
+          type: integer
+          description: Flag de estado de pago (1 = Pagado).
+          example: 1
+        Tipooper:
+          type: integer
+          example: 0
+        CodigoDescuento:
+          type: string
+          example: ""
+        CodigoOrigenVenta:
+          type: string
+          description: Identificador que marca la orden como venta Web.
+          example: "01"
+        EntregarA:
+          type: string
+          example: "Julio Hernandez -"
+        DetallePedido:
+          type: array
+          description: Matriz de productos que componen el pedido.
+          items:
+            $ref: '#/components/schemas/DetallePedido'
+        Prepagos:
+          type: array
+          description: Sustento de pagos realizados vía pasarela web.
+          items:
+            $ref: '#/components/schemas/Prepago'
+    DetallePedido:
+      type: object
+      properties:
+        Item:
+          type: string
+          description: Número correlativo del producto.
+          example: "001"
+        Codigoproducto:
+          type: string
+          description: Código maestro del producto en Inforest.
+          example: "0001479"
+        Cantidad:
+          type: integer
+          example: 1
+        Lcombo:
+          type: string
+          description: Indicador de si el artículo es un combo (0 = No).
+          example: "0"
+        Observacion:
+          type: string
+          description: Modificadores o indicaciones para cocina.
+          example: "¡Feliz cumpleaños Julio"
+    Prepago:
+      type: object
+      properties:
+        Tipopago:
+          type: string
+          description: Código del método de pago en Inforest (ej. 02=Tarjeta).
+          example: "02"
+        Monto:
+          type: number
+          example: 45.00
+        Vuelto:
+          type: number
+          example: 0.0
+        Tarjeta:
+          type: string
+          description: Franquicia procesadora (ej. 17).
+          example: "17"
+        Numero:
+          type: string
+          description: Últimos 4 dígitos de validación.
+          example: "8146"
+        Propina:
+          type: number
+          example: 0.0
+        tipooper:
+          type: integer
+          example: 0
